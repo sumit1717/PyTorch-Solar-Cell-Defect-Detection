@@ -36,13 +36,14 @@ class ChallengeDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        img_path = self.data.iloc[idx, 0]
+        row = self.data.iloc[idx]
+        img_path = row[0]
         image = imread(img_path)
-        image = gray2rgb(image)  # Convert grayscale to RGB
-        label = self.data.iloc[idx, 1:].values.astype('float')
-        label = torch.tensor(label, dtype=torch.float32)
+        image = gray2rgb(image)
+        labels = row[1:].values.astype('float')
+        labels = torch.tensor(labels, dtype=torch.float32)
 
         if self._transform:
             image = self._transform(image)
 
-        return image, label
+        return image, labels
