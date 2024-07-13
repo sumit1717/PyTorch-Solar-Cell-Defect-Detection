@@ -36,7 +36,7 @@ class ChallengeDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        img_path = Path(self.data.iloc[idx, 0])
+        img_path = self.data.iloc[idx, 0]
         image = imread(img_path)
         image = gray2rgb(image)  # Convert grayscale to RGB
         label = self.data.iloc[idx, 1:].values.astype('float')
