@@ -73,7 +73,11 @@ class Trainer:
         running_loss = 0.0
 
         for batch in self._train_dl:
-            inputs, targets = batch['image'].cuda(), batch['label'].cuda()
+
+            inputs, targets = batch['image'], batch['label']
+            if self._cuda:
+                inputs, targets = inputs.cuda(), targets.cuda()
+
             loss = self.train_step(inputs, targets)
             running_loss += loss * inputs.size(0)
 
@@ -88,8 +92,12 @@ class Trainer:
 
         with t.no_grad():
             for batch in self._val_test_dl:
-                inputs, targets = batch['image'].cuda(), batch['label'].cuda()
-                loss, outputs = self._val_test_dl(inputs, targets)
+
+                inputs, targets = batch['image'], batch['label']
+                if self._cuda:
+                    inputs, targets = inputs.cuda(), targets.cuda()
+                loss, outputs = self.val_test_step(inputs, targets)
+
                 running_loss += loss * inputs.size(0)
                 all_predictions.append(outputs)
                 all_targets.append(targets)
