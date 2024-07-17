@@ -46,6 +46,7 @@ class ResNet(nn.Module):
         self.global_avg_pool = nn.AdaptiveAvgPool2d((1, 1))
         self.flatten = nn.Flatten()
         self.fc = nn.Linear(512, num_classes)
+        self.dropout = nn.Dropout(0.5)
         self.output_activation = nn.Sigmoid()
 
     def _make_residual_layer(self, input_channels, output_channels, num_blocks, stride):
@@ -69,5 +70,6 @@ class ResNet(nn.Module):
         avg_pool_output = self.global_avg_pool(residual_output4)
         flatten_output = self.flatten(avg_pool_output)
         fc_output = self.fc(flatten_output)
-        final_output = self.output_activation(fc_output)
+        dropout_output = self.dropout(fc_output)
+        final_output = self.output_activation(dropout_output)
         return final_output
