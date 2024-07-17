@@ -21,7 +21,8 @@ class ChallengeDataset(Dataset):
                 tv.transforms.RandomHorizontalFlip(),
                 tv.transforms.RandomVerticalFlip(),
                 tv.transforms.RandomRotation(10),
-                tv.transforms.RandomCrop(256, padding=4),
+                tv.transforms.RandomResizedCrop(256, scale=(0.8, 1.0)),
+                tv.transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
                 tv.transforms.ToTensor(),
                 tv.transforms.Normalize(mean=train_mean, std=train_std)
             ])
