@@ -27,12 +27,12 @@ resnet_model = model.ResNet(num_classes=2)
 # set up the optimizer (see t.optim)
 # create an object of type Trainer and set its early stopping criterion
 criterion = t.nn.BCEWithLogitsLoss()
-optimizer = t.optim.Adam(resnet_model.parameters(), lr=0.001)
+optimizer = t.optim.AdamW(resnet_model.parameters(), lr=0.0001)
 trainer = Trainer(model=resnet_model, crit=criterion, optim=optimizer,
                   train_dl=train_loader, val_test_dl=val_loader, cuda=True, early_stopping_patience=5)
 
 # go, go, go... call fit on trainer
-res = trainer.fit(epochs=20)
+res = trainer.fit(epochs=50)
 
 # plot the results
 plt.plot(np.arange(len(res[0])), res[0], label='train loss')
