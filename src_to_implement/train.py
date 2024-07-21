@@ -37,7 +37,7 @@ resnet_model.apply(weights_init)
 # set up the optimizer (see t.optim)
 # create an object of type Trainer and set its early stopping criterion
 criterion = t.nn.BCEWithLogitsLoss()
-optimizer = t.optim.Adam(resnet_model.parameters(), lr=0.001)
+optimizer = t.optim.Adam(resnet_model.parameters(), lr=0.0001, weight_decay=1e-5)
 
 scheduler = t.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
 
