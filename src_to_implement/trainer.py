@@ -14,13 +14,15 @@ class Trainer:
                  train_dl=None,                # Training data set
                  val_test_dl=None,             # Validation (or test) data set
                  cuda=True,                    # Whether to use the GPU
-                 early_stopping_patience=-1):  # The patience for early stopping
+                 early_stopping_patience=-1,
+                 scheduler=None):  # The patience for early stopping
         self._model = model
         self._crit = crit
         self._optim = optim
         self._train_dl = train_dl
         self._val_test_dl = val_test_dl
         self._cuda = cuda
+        self._scheduler = scheduler
 
         self._early_stopping_patience = early_stopping_patience
 
@@ -57,7 +59,6 @@ class Trainer:
                             'output' : {0 : 'batch_size'}})
             
     def train_step(self, x, y):
-        # self._model.train()
         self._optim.zero_grad()
 
         outputs = self._model(x)
@@ -65,6 +66,9 @@ class Trainer:
         loss = self._crit(outputs, y)
         loss.backward()
         self._optim.step()
+
+        if self._scheduler is not None:
+            self._scheduler.step()
 
         return loss.item()
         
@@ -95,6 +99,7 @@ class Trainer:
         running_loss = 0.0
         all_predictions = []
         all_targets = []
+        first_batch = True
 
         with t.no_grad():
             for inputs, targets in self._val_test_dl:
@@ -107,6 +112,12 @@ class Trainer:
                 running_loss += loss * inputs.size(0)
                 all_predictions.append(outputs)
                 all_targets.append(targets)
+
+                if first_batch:
+                    print(f"Predictions: {outputs}")
+                    print(f"Targets: {targets.cpu().numpy()}")
+                    first_batch = False
+
 
         # Calculate the average loss and average metrics of your choice
         epoch_loss = running_loss / len(self._val_test_dl.dataset)
@@ -143,6 +154,9 @@ class Trainer:
                 self.save_checkpoint(epoch)
             else:
                 self.epochs_without_improvement += 1
+
+            if self._scheduler is not None:  # Step the scheduler if present
+                self._scheduler.step()
 
             if 0 < self._early_stopping_patience <= self.epochs_without_improvement:
                 print("Early stopping triggered")

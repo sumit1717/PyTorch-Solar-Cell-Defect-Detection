@@ -26,8 +26,8 @@ train_data, val_data = train_test_split(data_frame, test_size=0.2, random_state=
 train_dataset = ChallengeDataset(train_data, mode='train')
 val_dataset = ChallengeDataset(val_data, mode='val')
 
-train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False)
+train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
 
 # create an instance of our ResNet model
 resnet_model = model.ResNet(num_classes=2)
@@ -37,12 +37,15 @@ resnet_model.apply(weights_init)
 # set up the optimizer (see t.optim)
 # create an object of type Trainer and set its early stopping criterion
 criterion = t.nn.BCEWithLogitsLoss()
-optimizer = t.optim.SGD(resnet_model.parameters(), lr=0.001, momentum=0.9)
+optimizer = t.optim.Adam(resnet_model.parameters(), lr=0.001)
+
+scheduler = t.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
+
 trainer = Trainer(model=resnet_model, crit=criterion, optim=optimizer,
-                  train_dl=train_loader, val_test_dl=val_loader, cuda=True, early_stopping_patience=5)
+                  train_dl=train_loader, val_test_dl=val_loader, cuda=True, early_stopping_patience=5, scheduler=scheduler)
 
 for batch in train_loader:
-    inputs, targets = batch['image'], batch['label']
+    inputs, targets = batch
     if t.cuda.is_available():
         inputs, targets = inputs.cuda(), targets.cuda()
     outputs = resnet_model(inputs)
