@@ -38,7 +38,10 @@ class ChallengeDataset(Dataset):
 
     def __getitem__(self, idx):
         row = self.data.iloc[idx]
-        img_path, label1, label2 = row[0].split(';')
+        img_path = row['filename']
+        label1 = row['crack']
+        label2 = row['inactive']
+
         image = imread(img_path)
         image = gray2rgb(image)
         labels = torch.tensor([float(label1), float(label2)], dtype=torch.float32)
@@ -46,4 +49,4 @@ class ChallengeDataset(Dataset):
         if self._transform:
             image = self._transform(image)
 
-        return {'image': image, 'label': labels}
+        return image, labels

@@ -7,6 +7,15 @@ import model
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
+import torch.nn as nn
+
+
+def weights_init(m):
+    if isinstance(m, nn.Conv2d):
+        nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+    elif isinstance(m, nn.BatchNorm2d):
+        nn.init.constant_(m.weight, 1)
+        nn.init.constant_(m.bias, 0)
 
 # load the data from the csv file and perform a train-test-split
 # this can be accomplished using the already imported pandas and sklearn.model_selection modules
@@ -22,14 +31,24 @@ val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False)
 
 # create an instance of our ResNet model
 resnet_model = model.ResNet(num_classes=2)
+resnet_model.apply(weights_init)
 
 # set up a suitable loss criterion (you can find a pre-implemented loss functions in t.nn)
 # set up the optimizer (see t.optim)
 # create an object of type Trainer and set its early stopping criterion
 criterion = t.nn.BCEWithLogitsLoss()
-optimizer = t.optim.AdamW(resnet_model.parameters(), lr=0.0001)
+optimizer = t.optim.SGD(resnet_model.parameters(), lr=0.001, momentum=0.9)
 trainer = Trainer(model=resnet_model, crit=criterion, optim=optimizer,
                   train_dl=train_loader, val_test_dl=val_loader, cuda=True, early_stopping_patience=5)
+
+for batch in train_loader:
+    inputs, targets = batch['image'], batch['label']
+    if t.cuda.is_available():
+        inputs, targets = inputs.cuda(), targets.cuda()
+    outputs = resnet_model(inputs)
+    print("Model Outputs: ", outputs)
+    print("Targets: ", targets)
+    break
 
 # go, go, go... call fit on trainer
 res = trainer.fit(epochs=50)

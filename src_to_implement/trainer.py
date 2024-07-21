@@ -126,6 +126,7 @@ class Trainer:
         for epoch in range(epochs):
             train_loss = self.train_epoch()
             val_loss, val_f1 = self.val_test()
+            t.cuda.empty_cache()
 
             train_losses.append(train_loss)
             val_losses.append(val_loss)
