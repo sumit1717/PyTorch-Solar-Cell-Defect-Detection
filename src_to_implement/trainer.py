@@ -57,9 +57,11 @@ class Trainer:
                             'output' : {0 : 'batch_size'}})
             
     def train_step(self, x, y):
+        # self._model.train()
         self._optim.zero_grad()
 
         outputs = self._model(x)
+        y = y.type(t.float32)
         loss = self._crit(outputs, y)
         loss.backward()
         self._optim.step()
@@ -76,9 +78,9 @@ class Trainer:
         self._model.train()
         running_loss = 0.0
 
-        for batch in self._train_dl:
+        for inputs, targets in self._train_dl:
 
-            inputs, targets = batch['image'], batch['label']
+            # inputs, targets = batch['image'], batch['label']
             if self._cuda:
                 inputs, targets = inputs.cuda(), targets.cuda()
 
@@ -95,9 +97,9 @@ class Trainer:
         all_targets = []
 
         with t.no_grad():
-            for batch in self._val_test_dl:
+            for inputs, targets in self._val_test_dl:
 
-                inputs, targets = batch['image'], batch['label']
+                # inputs, targets = batch['image'], batch['label']
                 if self._cuda:
                     inputs, targets = inputs.cuda(), targets.cuda()
                 loss, outputs = self.val_test_step(inputs, targets)

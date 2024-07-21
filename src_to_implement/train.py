@@ -19,7 +19,7 @@ def weights_init(m):
 
 # load the data from the csv file and perform a train-test-split
 # this can be accomplished using the already imported pandas and sklearn.model_selection modules
-data_frame = pd.read_csv('data.csv')
+data_frame = pd.read_csv('data.csv', delimiter=';')
 train_data, val_data = train_test_split(data_frame, test_size=0.2, random_state=42)
 
 # set up data loading for the training and validation set each using t.utils.data.DataLoader and ChallengeDataset objects
